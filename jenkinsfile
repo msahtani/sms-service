@@ -2,7 +2,7 @@ pipeline {
     agent linux
 
     triggers {
-        githubPush() // This triggers the build on GitHub push events.
+        githubPush() // This triggers the build on GitHub push eents.
     }
 
     stages {
