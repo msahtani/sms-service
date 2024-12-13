@@ -1,5 +1,5 @@
 pipeline {
-    agent linux
+    agent any
 
     triggers {
         githubPush() // This triggers the build on GitHub push eents.
