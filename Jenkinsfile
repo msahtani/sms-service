@@ -2,13 +2,13 @@ pipeline {
     agent {label 'linux'}
 
     triggers {
-        githubPush() // This triggers the build on GitHub push eents.
+        githubPush() // This triggers the build on GitHub push evnts.
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/msahtani/sms-service.git'
+                git clone 'https://github.com/msahtani/sms-service.git'
             }
         }
         stage('Build') {
