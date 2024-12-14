@@ -27,7 +27,7 @@ pipeline {
 
     stage('Deploy') {
       steps {
-        echo 'Deploying into the cloud....'
+        echo 'Deploying into the cloud...'
         sh 'nohup java -jar app.jar &'
     }
   }
