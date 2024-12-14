@@ -7,7 +7,8 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building project....'
-                sh 'mvn -B -DskipTests clean package' 
+                sh 'mvn -B -DskipTests clean package'
+                archiveArtifacts artifacts: 'target/*.jar', followSymlinks: false
             }
         }
         stage('Test') {
