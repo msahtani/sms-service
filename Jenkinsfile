@@ -30,6 +30,12 @@ pipeline {
         echo 'Deploying into the cloud...'
         sh 'nohup java -jar app.jar &'
     }
+
+    stage('Check') {
+      steps {
+        sh 'cat nohup.out'
+      }
+    }
   }
     
   }
