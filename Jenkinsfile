@@ -14,7 +14,8 @@ pipeline {
             steps {
                 echo 'Building project....'
                 sh 'mvn -B -DskipTests clean package'
-                archiveArtifacts artifacts: 'target/*.jar', followSymlinks: false
+                sh 'mv target/*.jar app.jar'
+                archiveArtifacts artifacts: '*.jar', followSymlinks: false
             }
         }
         
@@ -27,8 +28,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying into the cloud...'
-                sh 'mv *.jar app.jar'
-                sh 'cd target && java -jar app.jar'
+                sh 'java -jar app.jar'
             }
         }
         
