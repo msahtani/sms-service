@@ -3,12 +3,7 @@ spring:
     name: sms-service
 
 server:
-  port: 443
-  ssl:
-    enabled: true
-    key-alias: myapp
-    key-store-classpath: myapp-keystore.p12
-    key-store-password: secret
-    key-store-type: PKCS12
+  port: 80
+
 
     
