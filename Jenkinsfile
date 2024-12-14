@@ -27,6 +27,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying into the cloud...'
+                sh 'mv *.jar app.jar'
+                sh 'cd target && java -jar app.jar'
             }
         }
         
