@@ -1,8 +1,14 @@
 pipeline {
-    agent {label 'linux'}
+    
+    agent {
+        label 'linux'
+    }
+
+    triggers {
+        githubPush()
+    }
 
     stages {
-
         
         stage('Build') {
             steps {
@@ -11,6 +17,7 @@ pipeline {
                 archiveArtifacts artifacts: 'target/*.jar', followSymlinks: false
             }
         }
+        
         stage('Test') {
             steps {
                 echo 'Running tests..'
@@ -22,5 +29,6 @@ pipeline {
                 echo 'Deploying into the cloud...'
             }
         }
+        
     }
 }
