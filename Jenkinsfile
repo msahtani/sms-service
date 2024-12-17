@@ -25,8 +25,8 @@ pipeline {
         // run the app using JVM
         script {
           sh '''
-          sh 'chmod +x run.sh'
-          sh './run.sh > output.log 2>&1 &'
+          chmod +x run.sh
+          ./run.sh > output.log 2>&1 &
           disown
           echo "Process disowned and running in background"
           '''
