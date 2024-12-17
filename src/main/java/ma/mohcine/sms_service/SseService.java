@@ -70,5 +70,11 @@ public class SseService {
 
     }
 
+    public void cleanUp(){
+        for(SseEmitter sse: sses.values()){
+            sse.complete();
+        }
+        sses.clear();
+    }
 
 }
