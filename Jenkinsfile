@@ -24,7 +24,9 @@ pipeline {
       steps {
         // run the app using JVM
         sh 'chmod +x run.sh'
-        sh 'nohup ./run.sh &'
+        sh './run.sh > output.log 2>&1 &'
+        disown
+        echo "Process disowned and running in background"
       }
     }
 
