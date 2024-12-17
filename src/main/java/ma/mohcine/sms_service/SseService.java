@@ -31,13 +31,7 @@ public class SseService {
 
         final SseEmitter emitter = new SseEmitter(0L);
 
-        // establish connection
-        emitter.send(
-            SseEmitter.event()
-                .name("establish")
-                .data("connected successfully")
-                .build()
-        );
+       
 
         // on error -> copmplete
         emitter.onError(ex -> {
@@ -53,6 +47,9 @@ public class SseService {
             );
             sses.remove(key);
         });
+
+         // establish connection
+         emitter.send("");
             
         sses.put(key, emitter);
         
