@@ -9,6 +9,9 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import static org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event;
+
+
 import lombok.extern.log4j.Log4j2;
 
 @Service
@@ -49,7 +52,9 @@ public class SseService {
         });
 
          // establish connection
-         emitter.send("");
+         emitter.send(
+            event().name("establish").data("connected successfully")
+         );
             
         sses.put(key, emitter);
         
