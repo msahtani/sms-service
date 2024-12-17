@@ -22,7 +22,7 @@ pipeline {
     stage('Shutdown'){
       steps {
         // stop the previous process if exists
-        sh 'fuser -k -TERM 80/tcp || :'
+        sh 'fuser -k -TERM 80/tcp'
       }
     }
 
