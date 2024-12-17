@@ -1,12 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 
-# Check if the PID file exists
-if [ -f "app.pid" ]; then
-  PID=$(cat app.pid)
-  echo "Stopping existing app with PID: ${PID}"
-  kill -9 $PID
+PORT=80
+
+# Check if the port is in use
+PID=$(lsof -ti tcp:${PORT})
+
+if [ -n "$PID" ]; then
+  echo "Stopping existing app running on port ${PORT} (PID: ${PID})"
+  kill -15 $PID
 fi
 
-# Start new app instance
+# Start the new instance
 echo "Starting new instance..."
-nohup java -jar your-app.jar --spring.pid.file=app.pid &
+nohup java -jar app.jar
