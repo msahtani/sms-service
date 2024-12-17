@@ -18,16 +18,16 @@ pipeline {
       }
     }
       
-    stage('Test') {
+
+    stage('Shutdown'){
       steps {
-        echo 'Running tests..'
+        // stop the previous process if exists
+        sh 'fuser -kv -TERM 80/tcp || :'
       }
     }
 
     stage('Deploy') {
       steps {
-        // stop the previous process if exists
-        sh 'fuser -kv -TERM 80/tcp || :'
         // run the app using JVM
         sh 'nohup java -jar app.jar &'
       }
