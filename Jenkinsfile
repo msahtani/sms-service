@@ -19,17 +19,10 @@ pipeline {
     }
       
 
-    stage('Shutdown'){
-      steps {
-        // stop the previous process if exists
-        sh 'fuser -k -TERM 80/tcp'
-      }
-    }
-
     stage('Deploy') {
       steps {
         // run the app using JVM
-        sh 'nohup java -jar app.jar'
+        sh 'source run.sh'
       }
     }
 

@@ -3,6 +3,8 @@ spring:
     name: sms-service
   lifecycle:
     timeout-per-shutdown-phase: 30s
+  pid:
+    file: app.pid
 
 
 server:
