@@ -12,4 +12,4 @@ fi
 
 # Start the new instance
 echo "Starting new instance..."
-nohup java -jar app.jar
+nohup java -jar app.jar &

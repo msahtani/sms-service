@@ -23,7 +23,8 @@ pipeline {
     stage('Deploy') {
       steps {
         // run the app using JVM
-        sh 'chmod +x run.sh && ./run.sh'
+        sh 'chmod +x run.sh'
+        sh './run.sh'
       }
     }
 
