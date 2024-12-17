@@ -29,7 +29,7 @@ pipeline {
     stage('Deploy') {
       steps {
         // run the app using JVM
-        sh 'nohup java -jar app.jar &'
+        sh 'nohup java -jar app.jar'
       }
     }
 
