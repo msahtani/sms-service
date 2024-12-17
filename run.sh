@@ -3,7 +3,7 @@
 PORT=80
 
 # Check if the port is in use
-PID=`jobs -p`
+PID=`lsof -ti tcp:80`
 
 if [ -n "$PID" ]; then
   echo "Stopping existing app running on port ${PORT} (PID: ${PID})"
@@ -12,4 +12,4 @@ fi
 
 # Start the new instance
 echo "Starting new instance..."
-nohup java -jar app.jar &
+java -jar app.jar

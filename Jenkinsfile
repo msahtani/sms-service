@@ -24,7 +24,7 @@ pipeline {
       steps {
         // run the app using JVM
         sh 'chmod +x run.sh'
-        sh './run.sh'
+        sh 'nohup ./run.sh &'
       }
     }
 
