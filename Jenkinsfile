@@ -33,11 +33,7 @@ pipeline {
       }
     }
 
-    stage('Check') {
-      steps {
-        sh 'cat nohup.out'
-      }
-    }
+  
   }
   
 }
