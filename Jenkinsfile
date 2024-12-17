@@ -1,6 +1,6 @@
 pipeline {
     
-    
+
   agent {
     node 'sms-service'
   }
@@ -23,7 +23,7 @@ pipeline {
     stage('Deploy') {
       steps {
         // run the app using JVM
-        sh 'source run.sh'
+        sh 'run.sh &'
       }
     }
 
