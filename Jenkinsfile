@@ -15,7 +15,7 @@ pipeline {
       steps {
         sh 'mvn -B -DskipTests clean package'
         sh 'mv target/*.jar app.jar'
-        archiveArtifacts artifacts: '*.jar', followSymlinks: false
+        archiveArtifacts artifacts: 'app.jar', followSymlinks: false
       }
     }
       
