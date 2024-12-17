@@ -1,7 +1,7 @@
 pipeline {
     
   agent {
-      label 'linux'
+    node 'sms-service'
   }
 
   triggers {
@@ -12,7 +12,6 @@ pipeline {
       
     stage('Build') {
       steps {
-        echo 'Building project....'
         sh 'mvn -B -DskipTests clean package'
         sh 'mv target/*.jar app.jar'
         archiveArtifacts artifacts: '*.jar', followSymlinks: false
@@ -27,7 +26,9 @@ pipeline {
 
     stage('Deploy') {
       steps {
-        echo 'Deploying into the cloud...'
+        // stop the previous process
+        sh 'fuser 80/tcp -k'
+        // run the app using JVM
         sh 'nohup java -jar app.jar &'
       }
     }

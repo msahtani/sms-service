@@ -3,11 +3,12 @@ package ma.mohcine.sms_service;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
 
 @Service
@@ -20,59 +21,39 @@ public class SseService {
         this.sses = new HashMap<>();
     }
 
-    private SseEmitter createSSE(
-            final String address,
-            final int port
-    ) {
 
-        final String key = "%s:%d".formatted(address, port);
+    public SseEmitter register(String phoneNumber) throws IOException {
+        
+        
+        String key = Optional
+            .ofNullable(phoneNumber)
+            .orElse(UUID.randomUUID().toString());
 
         final SseEmitter emitter = new SseEmitter(0L);
-        sses.put(key, emitter);
 
-
+        // on error -> copmplete
         emitter.onError(ex -> {
             log.error("error: {}", ex.getMessage());
             emitter.complete();
         });
-
+        
+        // on completion
         emitter.onCompletion(() -> {
             log.info(
-                " {}:{} : SSE connection is completed from the server",
-                address, port 
+                "SSE connection is completed from the server : {}",
+                phoneNumber
             );
             sses.remove(key);
         });
-
-        return emitter;
-    }
-
-    public SseEmitter register(HttpServletRequest request) {
+            
+        sses.put(key, emitter);
         
-        final var address = request.getRemoteAddr();
-        final var port = request.getRemotePort();
-
-        var emitter = createSSE(address, port);
-
-        
-        try{
-            emitter.send("");
-        }catch(Exception ignored){
-            throw new RuntimeException();
-        }
-        
-
-        log.info(
-                "received a SSE connection from {}:{}",
-                address, port
-        );
-
         return emitter;
     }
 
     public void send(SMS sms) throws IOException {
 
-        // send to the all (actually it's just one connected device in the map)
+        // TODO: implement UNICAST, DISTRIBUTED sending mode
         for(SseEmitter sse: sses.values()){
             sse.send(sms);
         }
