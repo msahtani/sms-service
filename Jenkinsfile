@@ -23,14 +23,8 @@ pipeline {
     stage('Deploy') {
       steps {
         // run the app using JVM
-        script {
-          sh '''
-          chmod +x run.sh
-          ./run.sh > output.log 2>&1 &
-          disown
-          echo "Process disowned and running in background"
-          '''
-        }
+        sh 'chmod +x run.sh'
+        sh './run.sh'
         
       }
     }
