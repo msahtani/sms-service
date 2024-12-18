@@ -20,6 +20,8 @@ import lombok.extern.log4j.Log4j2;
 public class GracefulShutdown implements TomcatConnectorCustomizer,
     ApplicationListener<ContextClosedEvent>{
 
+    private static final int TIMEOUT = 30;
+
     private final SseService sseService;
     
     private volatile Connector connector;
@@ -37,9 +39,15 @@ public class GracefulShutdown implements TomcatConnectorCustomizer,
             try (ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) executor){
                 
                 threadPoolExecutor.shutdown();
-                if (!threadPoolExecutor.awaitTermination(30, TimeUnit.SECONDS)) {
+                if (!threadPoolExecutor.awaitTermination(TIMEOUT, TimeUnit.SECONDS)) {
                     log.warn("Tomcat thread pool did not shut down gracefully within "
                             + "30 seconds. Proceeding with forceful shutdown");
+                }
+
+                threadPoolExecutor.shutdownNow();
+
+                if (!threadPoolExecutor.awaitTermination(TIMEOUT, TimeUnit.SECONDS)) {
+                    log.error("Tomcat thread pool did not terminate");
                 }
             }
             catch (InterruptedException ex) {
