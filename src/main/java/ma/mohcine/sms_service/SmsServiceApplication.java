@@ -19,7 +19,7 @@ public class SmsServiceApplication {
 	}
 
 	@Bean
-	public ConfigurableServletWebServerFactory webServerFactory(final GracefulShutdown gracefulShutdown) {
+	public ConfigurableServletWebServerFactory webServerFactory(GracefulShutdown gracefulShutdown) {
 		TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory();
 		factory.addConnectorCustomizers(gracefulShutdown);
 		return factory;
