@@ -14,8 +14,8 @@ RUN useradd -m -u 1001 appuser
 USER appuser
 
 WORKDIR /app
-COPY --from=builder /app/target/*.jar /app/application.jar
+COPY --from=builder /app/target/*.jar /app/app.jar
 
 
 # Run the application
-CMD ["java", "-jar", "/application.jar"]
+CMD ["java", "-jar", "app.jar"]
