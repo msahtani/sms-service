@@ -7,81 +7,79 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import static org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event;
-
 
 import lombok.extern.log4j.Log4j2;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks.Many;
+import static reactor.core.publisher.Sinks.many;
+
 
 @Service
 @Log4j2
 public class SseService {
 
-    private final Map<String, SseEmitter> sses;
+    private final Map<String, Many<SMS>> sinks;
 
     public SseService() {
-        this.sses = new HashMap<>();
+        this.sinks = new HashMap<>();
     }
 
 
-    public SseEmitter register(String phoneNumber) throws IOException {
+    public Flux<SMS> register(String phoneNumber) throws IOException {
         
         
         String key = Optional
             .ofNullable(phoneNumber)
             .orElse(UUID.randomUUID().toString());
 
-        final SseEmitter emitter = new SseEmitter(0L);
 
-       
+        Many<SMS> sink = many().multicast().onBackpressureBuffer();
 
-        // on error -> copmplete
-        emitter.onError(ex -> {
-            log.error("error: {}", ex.getMessage());
-            emitter.complete();
-        });
+    
+        // establish connection
+        // emitter.send(
+        //     event().name("establish").data("connected successfully")
+        // );
+
+        sinks.put(key, sink);
+    
         
-        // on completion
-        emitter.onCompletion(() -> {
-            log.info(
-                "SSE connection is completed from the server : {}",
-                phoneNumber
-            );
-            sses.remove(key);
-        });
+        return sink.asFlux()
+            .doOnError(ex -> {
+                log.error("error: {}", ex.getMessage());
+            }).doOnCancel(() -> {
+                log.info("SSE connection is cancelled from the server : {}", key);
+            }).doOnComplete(() -> {
+                log.info(
+                    "SSE connection is completed from the server : {}",
+                    phoneNumber
+                );
+                sinks.remove(key);
+            });
 
-         // establish connection
-         emitter.send(
-            event().name("establish").data("connected successfully")
-         );
-            
-        sses.put(key, emitter);
-        
-        return emitter;
     }
 
     public void send(SMS sms) throws IOException {
 
-        if(sses.size() == 0){
+        if(sinks.size() == 0){
             log.warn("There are no connected device");
             return;
         }
 
-        if(sses.size() == 1){
+        if(sinks.size() == 1){
             log.warn("there is 1 connected device, ignoring 'sender' attribute");
            
-            for(SseEmitter sse: sses.values()){
-                sse.send(sms);
+            for(Many<SMS> sink: sinks.values()){
+                sink.tryEmitNext(sms);
             }
             return;
         }
 
-        Optional.ofNullable(sses.get(sms.getSender()))
+        Optional.ofNullable(sinks.get(sms.getSender()))
             .ifPresentOrElse(
-                sse -> {
+                sink -> {
                     try{
-                        sse.send(sms);
+                        sink.tryEmitNext(sms);
                     }catch(Exception ex){
                         throw new RuntimeException(ex.getMessage());
                     }
@@ -95,10 +93,10 @@ public class SseService {
     }
 
     public void cleanUp(){
-        for(SseEmitter sse: sses.values()){
-            sse.complete();
+        for(Many<SMS> sink: sinks.values()){
+            sink.tryEmitComplete();
         }
-        sses.clear();
+        sinks.clear();
     }
 
 }
