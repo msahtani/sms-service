@@ -7,9 +7,6 @@ WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 
-COPY .m2 /root/.m2
-
-
 
 # package into JAR file
 RUN mvn clean package -DskipTests
