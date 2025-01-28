@@ -16,20 +16,10 @@ public class SmsServiceApplication {
 
 
 	public static void main(String[] args) {
-		ConfigurableApplicationContext cac = 
-			SpringApplication.run(SmsServiceApplication.class, args);
+		
+		SpringApplication.run(SmsServiceApplication.class, args);
 
-		cac.addApplicationListener(new ApplicationListener<ContextClosedEvent>(){
-
-			@Override
-			public void onApplicationEvent(ContextClosedEvent event) {
-				log.info("cleaning active SSE connections ...");
-				SseService sseService = cac.getBean(SseService.class);
-				sseService.cleanUp();
-				log.info("cleaned active SSE connections ...");
-			}
-			
-		});
+	
 	}
 
 
