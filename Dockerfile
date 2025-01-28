@@ -14,13 +14,15 @@ RUN jdeps --multi-release 21 \
     --class-path 'app/lib/*' \
     --ignore-missing-deps \
     --list-deps \
-    app/app.jar > deps
+    app/app.jar > jar_modules
 
+RUN (java --list-modules | cut -d '@' -f1) > available_modules
 
+RUN grep -F -f available_modules jar_modules -o > result
 
 # build optimized jre runtime
 RUN jlink --compress=zip-9 \
-    --add-modules $(grep -Eo "(java|jdk|sun)[.[a-z0-9]*]*" deps | tr '\n' ',') \
+    --add-modules $(cat result | tr '\n' ',') \
     --strip-debug \
     --no-header-files \
     --no-man-pages \
