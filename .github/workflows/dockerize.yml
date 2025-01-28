@@ -48,4 +48,4 @@ jobs:
     # Push the Docker image to a registry (optional)
     - name: Push Docker Image
       run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/sms:latest .
+        docker push ${{ secrets.DOCKER_USERNAME }}/sms:latest 
