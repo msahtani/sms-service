@@ -55,7 +55,7 @@ ENV JAVA_HOME=/opt/jdk/jdk-21
 ARG APPLICATION_USER=spring
 
 # RUN apk add --no-cache shadow && \
-#     useradd -m -u 1001 $APPLICATION_USER
+# useradd -m -u 1001 $APPLICATION_USER
 
 
 WORKDIR /app
