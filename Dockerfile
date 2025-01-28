@@ -7,6 +7,10 @@ WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 
+COPY .m2 /root/.m2
+
+
+
 # package into JAR file
 RUN mvn clean package -DskipTests
 
@@ -30,10 +34,6 @@ RUN jdeps --multi-release 21 \
     app/app.jar > deps
 
 
-# deps file transformation
-RUN sed 's/^ *//' deps | tr '\n' ',' > deps
-
-
 
 # build optimized jre runtime
 RUN jlink --compress=zip-9 \
@@ -41,7 +41,7 @@ RUN jlink --compress=zip-9 \
     --strip-debug \
     --no-header-files \
     --no-man-pages \
-    --output /optimized-jdk-21
+    --output /optimized-jre-21
 
 
 
@@ -54,9 +54,8 @@ ENV JAVA_HOME=/opt/jdk/jdk-21
 # Add app user
 ARG APPLICATION_USER=spring
 
-RUN apk add --no-cache shadow && \
-    useradd -m -u 1001 $APPLICATION_USER
-
+# RUN apk add --no-cache shadow && \
+#     useradd -m -u 1001 $APPLICATION_USER
 
 
 WORKDIR /app
@@ -65,11 +64,11 @@ WORKDIR /app
 COPY --from=jre-builder app/app.jar app.jar
 
 # copy the jre runtime from the jre-builder stage
-COPY --from=jre-builder  /optimized-jdk-21 ${JAVA_HOME}
+COPY --from=jre-builder  /optimized-jre-21 ${JAVA_HOME}
 
 ENV PATH=$PATH:${JAVA_HOME}/bin
 
-USER ${APPLICATION_USER}
+# USER ${APPLICATION_USER}
 
 # Run the application
 CMD ["java", "-jar", "app.jar"]

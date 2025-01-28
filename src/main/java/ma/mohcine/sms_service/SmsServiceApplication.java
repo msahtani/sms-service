@@ -2,27 +2,35 @@ package ma.mohcine.sms_service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.event.ContextClosedEvent;
 
-
-import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
-import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
-
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+@RequiredArgsConstructor
 @SpringBootApplication
 @Log4j2
 public class SmsServiceApplication {
 
+
 	public static void main(String[] args) {
-		SpringApplication.run(SmsServiceApplication.class, args);
+		ConfigurableApplicationContext cac = 
+			SpringApplication.run(SmsServiceApplication.class, args);
+
+		cac.addApplicationListener(new ApplicationListener<ContextClosedEvent>(){
+
+			@Override
+			public void onApplicationEvent(ContextClosedEvent event) {
+				log.info("cleaning active SSE connections ...");
+				SseService sseService = cac.getBean(SseService.class);
+				sseService.cleanUp();
+				log.info("cleaned active SSE connections ...");
+			}
+			
+		});
 	}
 
-	@Bean
-	public ConfigurableServletWebServerFactory webServerFactory(GracefulShutdown gracefulShutdown) {
-		TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory();
-		factory.addConnectorCustomizers(gracefulShutdown);
-		return factory;
-	}
 
 }

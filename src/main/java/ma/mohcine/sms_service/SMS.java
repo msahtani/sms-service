@@ -9,4 +9,5 @@ public class SMS {
     private String sender;
     private String phoneNumber;
     private String message;
+    private String redirectedFrom;
 }
