@@ -6,23 +6,30 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks.Many;
 import static reactor.core.publisher.Sinks.many;
 
 
 @Service
+@RequiredArgsConstructor
 @Log4j2
 public class SseService {
 
-    private final Map<String, Many<SMS>> sinks;
-
-    public SseService() {
-        this.sinks = new HashMap<>();
-    }
+    private final StringRedisTemplate redisTemplate;
+    
+    @Value("${custom.internal-ip}")
+    private String internalIp;
+    
+    private Map<String, Many<SMS>> sinks = new HashMap<>();
 
 
     public Flux<SMS> register(String phoneNumber) throws IOException {
@@ -32,15 +39,14 @@ public class SseService {
             .ofNullable(phoneNumber)
             .orElse(UUID.randomUUID().toString());
 
+        // register in the redis
+        redisTemplate.opsForValue().set(key, internalIp);
+        //
+        
 
         Many<SMS> sink = many().multicast().onBackpressureBuffer();
 
     
-        // establish connection
-        // emitter.send(
-        //     event().name("establish").data("connected successfully")
-        // );
-
         sinks.put(key, sink);
     
         
@@ -59,39 +65,45 @@ public class SseService {
 
     }
 
-    public void send(SMS sms) throws IOException {
+    
+    private void redirectToServer(String ip, SMS sms){
+        log.info("redirecting to the server {}", ip);
+        sms.setRedirectedFrom(internalIp);
 
-        if(sinks.size() == 0){
-            log.warn("There are no connected device");
-            return;
-        }
+        RestTemplate restTemplate = new RestTemplate();
 
-        if(sinks.size() == 1){
-            log.warn("there is 1 connected device, ignoring 'sender' attribute");
-           
-            for(Many<SMS> sink: sinks.values()){
-                sink.tryEmitNext(sms);
-            }
-            return;
-        }
-
-        Optional.ofNullable(sinks.get(sms.getSender()))
-            .ifPresentOrElse(
-                sink -> {
-                    try{
-                        sink.tryEmitNext(sms);
-                    }catch(Exception ex){
-                        throw new RuntimeException(ex.getMessage());
-                    }
-                },
-                () -> {
-                    throw new RuntimeException("the device is not connected");
-                }
-            );
-        
+        restTemplate.postForEntity(
+            "http://%s/app-gw/send".formatted(ip),
+            sms, Object.class
+        );
 
     }
 
+
+    public Mono<Void> send(SMS sms) throws IOException {
+
+        final String sender = sms.getSender();
+        final Many<SMS> sink = sinks.get(sender);
+
+        if(sink == null){
+            String ip = redisTemplate.opsForValue().get(sender);
+            if(ip != null) {
+                redirectToServer(ip, sms);
+                
+            }else{
+                throw new RuntimeException("the device is not connected");
+            }
+        }else {
+            var result = sink.tryEmitNext(sms);
+            log.debug("result status: ", result);
+        }
+
+    
+        return Mono.empty();
+        
+    }
+
+    
     public void cleanUp(){
         for(Many<SMS> sink: sinks.values()){
             sink.tryEmitComplete();
