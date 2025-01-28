@@ -1,24 +1,10 @@
-###### Stage 1: Build the application ######
-FROM maven:3.9.9-eclipse-temurin-21 AS app-builder
 
-WORKDIR /app
-
-# copy source file into the stage
-COPY pom.xml .
-COPY src ./src
-
-
-# package into JAR file
-RUN mvn clean package -DskipTests
-
-
-
-###### Stage 2: build optimized jre runtime ######
+###### Stage 1: build optimized jre runtime ######
 FROM eclipse-temurin:21-jdk-alpine AS jre-builder
 
 WORKDIR /app
 
-COPY --from=app-builder /app/target/*.jar app.jar
+COPY  target/*.jar app.jar
 
 # unpack the executable jar
 RUN java -Djarmode=tools -jar app.jar extract
@@ -42,7 +28,7 @@ RUN jlink --compress=zip-9 \
 
 
 
-###### Stage 3: Create a minimal runtime image ######
+###### Stage 2: Create a minimal runtime image ######
 FROM alpine:latest
 
 # define JAVA_HOME env variable
