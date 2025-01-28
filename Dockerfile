@@ -20,7 +20,7 @@ RUN jdeps --multi-release 21 \
 
 # build optimized jre runtime
 RUN jlink --compress=zip-9 \
-    --add-modules $(grep 'java[.[a-z]*]*' -o deps | tr '\n' ',') \
+    --add-modules $(grep -Eo "(java|jdk|sun)[.[a-z0-9]*]*" deps | tr '\n' ',') \
     --strip-debug \
     --no-header-files \
     --no-man-pages \
